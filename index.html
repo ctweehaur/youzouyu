@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《游走于两根棍子上的精灵》生词学习卡</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- 外部样式 -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f6f5f2;
+            color: #4a4540; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .word-title { 
+            font-family: 'Noto Serif SC', serif; 
+        }
+        .animate-bounce {
+            animation: toastBounce 0.5s ease;
+        }
+        @keyframes toastBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 flex flex-col items-center justify-start select-none">
+
+    <div id="app" class="w-full max-w-lg pt-4 flex flex-col">
+        <!-- 标题 -->
+        <header class="text-center mb-4">
+            <h1 class="text-2xl font-bold text-stone-700 tracking-wide word-title">《游走于两根棍子上的精灵》</h1>
+            <div class="mt-3 bg-stone-200/60 rounded-full h-2 w-full overflow-hidden flex">
+                <div id="mastery-progress-bar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="mastery-status" class="text-[10px] text-stone-400 mt-1.5 font-mono tracking-wider">已掌握 0 / 0 词 (0%)</p>
+        </header>
+
+        <!-- 功能按钮 -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="startWeaknessTraining()" class="bg-white border border-stone-200 py-3 px-2 rounded-xl shadow-sm text-center text-stone-700 text-xs font-semibold hover:bg-stone-50 transition-all flex items-center justify-center gap-1.5">
+                🎯 开启错题专项训练 (<span class="text-amber-600 font-bold" id="wrong-count">0</span>)
+            </button>
+            <button onclick="startQuiz()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-2 rounded-xl shadow-md text-xs font-semibold hover:from-amber-600 hover:to-orange-600 transition-all flex items-center justify-center gap-1.5">
+                📝 开始小测验
+            </button>
+        </div>
+
+        <!-- ==========================================
+             卡片容器 + 左右导航
+             ========================================== -->
+        <div class="relative flex items-center w-full mb-4">
+            <!-- 左导航按钮 -->
+            <button onclick="prevCard()" id="prev-btn" class="absolute left-0 z-10 bg-white/80 backdrop-blur-sm hover:bg-white border-2 border-stone-200 hover:border-amber-400 text-stone-700 w-10 h-10 rounded-full shadow-md transition-all flex items-center justify-center text-lg -ml-2">
+                ◀
+            </button>
+            
+            <!-- 卡片 -->
+            <div id="card-container" class="w-full h-[380px] sm:h-[400px] cursor-pointer relative mx-8">
+                <div id="flip-card" class="w-full h-full relative transform-style-3d">
+                    
+                    <!-- 卡片正面 -->
+                    <div class="absolute inset-0 bg-white rounded-2xl border border-stone-100 shadow-xl shadow-stone-200/50 flex flex-col items-center justify-center p-6 backface-hidden">
+                        <div id="card-word-ruby" class="word-title flex flex-wrap items-center justify-center text-5xl sm:text-6xl tracking-wide select-none">
+                            <!-- 由 JavaScript 动态生成带拼音的汉字 -->
+                        </div>
+                    </div>
+
+                    <!-- 卡片反面 -->
+                    <div class="absolute inset-0 bg-orange-50/40 rounded-2xl border-2 border-orange-100/60 shadow-xl shadow-stone-200/50 flex flex-col p-5 backface-hidden overflow-hidden">
+                        <div class="absolute inset-2 border border-amber-900/5 rounded-xl pointer-events-none"></div>
+
+                        <div class="relative z-10 flex flex-col justify-between h-full py-0.5">
+                            <!-- 中文释义 -->
+                            <div>
+                                <div class="inline-flex items-center gap-1 bg-amber-700/10 text-amber-800 text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md mb-1.5">
+                                    <span>华文释义</span>
+                                </div>
+                                <p id="card-def-zh" class="text-[15px] font-semibold text-stone-800 leading-relaxed pl-1">暂无释义</p>
+                            </div>
+
+                            <!-- 翻译双栏 -->
+                            <div class="grid grid-cols-2 gap-3 border-t border-b border-amber-900/5 py-2.5 my-1">
+                                <div>
+                                    <div class="inline-flex items-center gap-1 bg-sky-100/60 text-sky-800 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1">
+                                        <span>ENGLISH</span>
+                                    </div>
+                                    <p id="card-def-en" class="text-[11px] italic text-sky-900/70 leading-snug pl-0.5">No translation.</p>
+                                </div>
+                                <div>
+                                    <div class="inline-flex items-center gap-1 bg-rose-100/60 text-rose-800 text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1">
+                                        <span>MELAYU</span>
+                                    </div>
+                                    <p id="card-def-bm" class="text-[11px] text-rose-900/70 leading-snug pl-0.5 font-medium">Tiada terjemahan.</p>
+                                </div>
+                            </div>
+
+                            <!-- 例句 -->
+                            <div class="bg-white/80 border border-amber-950/5 p-3.5 rounded-xl shadow-sm">
+                                <div class="inline-flex items-center gap-1 bg-amber-900/5 text-amber-900/70 text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded mb-1.5">
+                                    <span>例句</span>
+                                </div>
+                                <p id="card-example" class="text-stone-700 text-[13px] font-medium leading-relaxed pl-0.5 tracking-wide">暂无例句。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <!-- 右导航按钮 -->
+            <button onclick="nextCard()" id="next-btn" class="absolute right-0 z-10 bg-white/80 backdrop-blur-sm hover:bg-white border-2 border-stone-200 hover:border-amber-400 text-stone-700 w-10 h-10 rounded-full shadow-md transition-all flex items-center justify-center text-lg -mr-2">
+                ▶
+            </button>
+        </div>
+
+        <!-- 进度计数器 -->
+        <div class="text-center mb-3">
+            <span id="card-counter" class="text-xs text-stone-400 font-mono">0 / 0</span>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="w-full flex flex-col items-center gap-3">
+            <div class="grid grid-cols-2 gap-4 w-full">
+                <button onclick="markMastery(false)" class="bg-white border-2 border-stone-200 hover:border-red-400 hover:bg-red-50/30 text-stone-700 py-3 px-6 rounded-xl font-semibold shadow-sm transition-all text-center text-sm flex items-center justify-center gap-2">
+                    ❌ 待加强
+                </button>
+                <button onclick="markMastery(true)" class="bg-stone-800 hover:bg-stone-900 text-white py-3 px-6 rounded-xl font-semibold shadow-md transition-all text-center text-sm flex items-center justify-center gap-2">
+                    ✅ 已掌握
+                </button>
+            </div>
+            <p id="progress-indicator" class="text-[11px] text-stone-400 font-mono tracking-wider">进度：0 / 0</p>
+        </div>
+    </div>
+
+    <!-- Toast 消息 -->
+    <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Quiz 弹窗 -->
+    <div id="quiz-modal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 relative flex flex-col max-h-[90vh]">
+            <button onclick="closeQuiz()" class="absolute top-3 right-3 text-stone-400 hover:text-stone-600 text-xl font-bold transition-colors">&times;</button>
+            <div class="border-b border-stone-100 pb-2 mb-3">
+                <h3 class="text-base font-bold text-stone-800 flex items-center gap-1" id="quiz-title-text">🎯 生词释义挑战</h3>
+                <div class="w-full bg-stone-100 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-amber-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="quiz-q-num" class="text-[10px] text-stone-400 mt-1 font-mono">题目 1 / 5</p>
+            </div>
+            <div class="flex-1 overflow-y-auto mb-1 pr-1">
+                <div id="quiz-question-container">
+                    <h4 id="quiz-question-word" class="text-2xl font-serif font-bold text-stone-800 text-center my-3 tracking-wide">-</h4>
+                    <div id="quiz-options" class="space-y-2"></div>
+                </div>
+                <div id="quiz-result-container" class="hidden text-center py-6">
+                    <span class="text-4xl block animate-bounce">🏆</span>
+                    <h4 class="text-xl font-bold text-stone-800 mt-3">测验圆满结束！</h4>
+                    <p id="quiz-score" class="text-3xl font-black text-amber-600 my-3">0 / 5</p>
+                    <p id="quiz-eval" class="text-xs text-stone-500 mb-5 px-4">完成得不错！</p>
+                    <button onclick="startQuiz()" class="w-full py-2.5 bg-stone-800 text-white rounded-xl text-sm font-medium hover:bg-stone-900 transition-colors">
+                        再考一次
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         脚本加载（顺序很重要！）
+         ========================================== -->
+    <!-- 1. 先加载数据 -->
+    <script src="data.js"></script>
+    
+    <!-- 2. 再加载逻辑 -->
+    <script src="script.js"></script>
+
+</body>
+</html>
