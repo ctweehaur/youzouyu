@@ -1,0 +1,92 @@
+/* ==========================================================================
+   3D 闪卡核心翻转架构
+   ========================================================================== */
+
+/* 1. 为最外层容器开启 3D 视距 */
+#card-container {
+    perspective: 1200px;
+}
+
+/* 2. 核心动画卡片座：负责承载整体旋转 */
+.transform-style-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 3. 当卡片被点击激活时，整体绕 Y 轴旋转 180 度 */
+.rotate-y-180 {
+    transform: rotateY(180deg);
+}
+
+/* 4. 正面和背面公用的基础 3D 隔离属性 */
+.backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 5. 终极修复向反面翻转时的文字镜像镜像倒转问题 */
+#flip-card > div:nth-child(2) {
+    transform: rotateY(180deg);
+}
+
+
+/* ==========================================================================
+   Quiz 测验系统与微调
+   ========================================================================== */
+
+/* 答题反馈期间，防止用户反复连点 */
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+/* 规范注音组件 (Ruby) 在各款浏览器下的排版表现 */
+ruby {
+    ruby-position: over;
+}
+
+rt {
+    user-select: none;
+}
+
+
+/* ==========================================================================
+   左右导航按钮样式
+   ========================================================================== */
+
+/* 导航按钮悬停效果 */
+#prev-btn,
+#next-btn {
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+#prev-btn:hover:not(:disabled),
+#next-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+    border-color: #f59e0b; /* amber-400 */
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+#prev-btn:active:not(:disabled),
+#next-btn:active:not(:disabled) {
+    transform: scale(0.9);
+}
+
+/* 禁用状态 */
+#prev-btn:disabled,
+#next-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+    transform: none !important;
+}
+
+/* 卡片计数器 */
+#card-counter {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+}
